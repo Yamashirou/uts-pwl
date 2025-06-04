@@ -12,7 +12,7 @@ class DashboardController extends BaseController
         $role = session()->get('role');
         if ($role === 'admin') {
             return view('v_dashboard_admin');
-        } elseif ($role === 'user') {
+        } elseif ($role === 'guest') {
             return view('v_dashboard_user');
         } 
     }

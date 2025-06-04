@@ -14,9 +14,15 @@ $routes->get('logout', 'AuthController::logout');
 $routes->get('genpass', 'AuthController::generatepassword');
 
 $routes->get('admin', 'DashboardController::index', ['filter' => 'role:admin']);
-$routes->get('user', 'DashboardController::index', ['filter' => 'role:user']);
+$routes->get('guest', 'DashboardController::index', ['filter' => 'role:guest']);
 
-$routes->get('produk', 'ProdukController::index', ['filter' => 'auth']);
+$routes->group('produk', ['filter' => 'auth'], function ($routes) { 
+    $routes->get('', 'ProdukController::index');
+    $routes->post('', 'ProdukController::create');
+    $routes->post('edit/(:any)', 'ProdukController::edit/$1');
+    $routes->get('delete/(:any)', 'ProdukController::delete/$1');
+});
+
 $routes->get('pelanggan', 'PelangganController::index', ['filter' => 'auth']);
 
 $routes->get('keranjang', 'KeranjangController::index', ['filter' => 'auth']);

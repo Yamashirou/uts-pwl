@@ -19,7 +19,7 @@
         </div>
     </div>
 </nav>
-<?php elseif (session()->get('role') === 'user'): ?>
+<?php elseif (session()->get('role') === 'guest'): ?>
     <div class="sb-sidenav-menu-heading">Menu <?= session()->get('role'); ?></div>
     <a class="nav-link" href="/keranjang">
         <div class="sb-nav-link-icon"><i class="fas fa-chart-area"></i></div>

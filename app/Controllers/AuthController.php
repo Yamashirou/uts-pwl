@@ -5,68 +5,56 @@ namespace App\Controllers;
 use App\Controllers\BaseController;
 use CodeIgniter\HTTP\ResponseInterface;
 
+use App\Models\UserModel;
+
 class AuthController extends BaseController
 {
+    protected $user;
     public function __construct()
     {
         helper(['form', 'url']);
-    }
-
-    public function generatepassword()
-    {
-        echo password_hash('admin123', PASSWORD_DEFAULT) . '<br>';
-        echo password_hash('yamashirou', PASSWORD_DEFAULT) . '<br>';
+        $this->user = new UserModel();
     }
 
     public function login()
-    {
-        if ($this->request->getPost()) {
+{
+    if ($this->request->getPost()) {
+        $rules = [
+            'username' => 'required|min_length[6]',
+            'password' => 'required|min_length[7]|numeric',
+        ];
+
+        if ($this->validate($rules)) {
             $username = $this->request->getVar('username');
             $password = $this->request->getVar('password');
 
-            // Simulasi data user (bisa diganti dengan ambil dari database)
-            $users = [
-                [
-                    'username' => 'admin',
-                    'password' => '$2y$10$GRuSpcL/0s2jDx/JFPC1PuIkCDGgXaJ/ijPE6qvvvvRO/tVs06CjS', // admin123
-                    'role'     => 'admin'
-                ],
-                [
-                    'username' => 'yama',
-                    'password' => '$2y$10$xLW6.le69pCwN1pOjpnQk.IgquSkSOXPf1KDXkMfK7E7q4DyXw6S2', // yamashirou
-                    'role'     => 'user'
-                ]
-            ];
+            $dataUser = $this->user->where(['username' => $username])->first(); //pasw 1234567
 
-            // Cek user dari daftar
-            foreach ($users as $user) {
-                if ($username === $user['username']) {
-                    if (password_verify($password, $user['password'])) {
-                        session()->set([
-                            'username'    => $user['username'],
-                            'role'        => $user['role'],
-                            'isLoggedIn'  => true
-                        ]);
+            if ($dataUser) {
+                if (password_verify($password, $dataUser['password'])) {
+                    session()->set([
+                        'username' => $dataUser['username'],
+                        'role' => $dataUser['role'],
+                        'isLoggedIn' => TRUE
+                    ]);
 
-                        // Redirect berdasarkan role
-                        if ($user['role'] === 'admin') {
-                            return redirect()->to(base_url('admin'));
-                        } elseif ($user['role'] === 'user') {
-                            return redirect()->to(base_url('user'));
-                        }
-                    } else {
-                        session()->setFlashdata('failed', 'Username & Password Salah');
-                        return redirect()->back();
-                    }
+                    return redirect()->to(base_url('/'));
+                } else {
+                    session()->setFlashdata('failed', 'Kombinasi Username & Password Salah');
+                    return redirect()->back();
                 }
+            } else {
+                session()->setFlashdata('failed', 'Username Tidak Ditemukan');
+                return redirect()->back();
             }
-
-            session()->setFlashdata('failed', 'Username tidak ditemukan');
-            return redirect()->back();
         } else {
-            return view('v_login');
+            session()->setFlashdata('failed', $this->validator->listErrors());
+            return redirect()->back();
         }
     }
+
+    return view('v_login');
+}
 
     public function logout()
     {
